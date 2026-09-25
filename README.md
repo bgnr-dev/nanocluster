@@ -27,6 +27,16 @@ This is not "three boards with k3s". This is a platform:
 - **Decisions in the repo** — ADRs and incidents, because on 12 GB every
   choice is a real trade-off
 
+## The 4 GB wall (episode 3, [ADR-002](docs/decisions/ADR-002-resource-budget.md))
+
+The whole design document is one number: **no workload exceeds 1 GiB of RAM**.
+
+- One budget instead of a capacity spreadsheet — every component fits a
+  mental model
+- Workloads are chosen for the budget, never the other way around
+- Saying no is a feature: what cannot fit under 1 GiB gets a dedicated
+  machine, not a squeeze
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |

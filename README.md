@@ -33,7 +33,8 @@ This is not "three boards with k3s". This is a platform:
 |---|---------|--------|
 | 1 | The hardware | ✅ shipped |
 | 2 | The scope — repo public | ✅ shipped |
-| 3+ | The build continues | coming — each episode adds its own artifacts |
+| 3 | The 4 GB wall | ✅ shipped |
+| 4+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)

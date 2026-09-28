@@ -37,6 +37,16 @@ The whole design document is one number: **no workload exceeds 1 GiB of RAM**.
 - Saying no is a feature: what cannot fit under 1 GiB gets a dedicated
   machine, not a squeeze
 
+## The GitOps foundation (episode 4, `argocd/`)
+
+The cluster is a render of this repo — pushed commits are deployments.
+
+- [`argocd/apps.yaml`](argocd/apps.yaml) — the App-of-Apps root: it
+  watches the repo and reconciles the child Applications
+- sync + prune + selfHeal — drift is impossible by construction
+- reproducible by default: delete the Applications and git recreates
+  them from the same commit
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |
@@ -44,7 +54,8 @@ The whole design document is one number: **no workload exceeds 1 GiB of RAM**.
 | 1 | The hardware | ✅ shipped |
 | 2 | The scope — repo public | ✅ shipped |
 | 3 | The 4 GB wall | ✅ shipped |
-| 4+ | The build continues | coming — each episode adds its own artifacts |
+| 4 | The GitOps foundation | ✅ shipped |
+| 5+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)

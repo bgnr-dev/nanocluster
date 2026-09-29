@@ -12,9 +12,7 @@ workloads, all inside that constraint.
 - 3× [NanoPC-T4](https://wiki.friendlyelec.com/wiki/index.php/NanoPC-T4) (Rockchip RK3399, 4 GB LPDDR3, ARMv8.0)
 - 1 dusty MikroTik routing the cluster (10.42.42.1) + a newer one
   hosting the LAN DNS for the `*.nc` zone (192.168.1.1)
-- 1 always-on desktop (amd64) next to it — 6 cores, 45 GiB of RAM:
-  the registry mirror + the fast CI runner (the big hammer beside
-  the ARM64 cluster)
+- 1 NAS (amd64) next to it — registry mirror + the fast CI runner
 
 ## The scope (episode 2, [ADR-001](docs/decisions/ADR-001-scope.md))
 

@@ -1,0 +1,60 @@
+# Placeholder hosts: the real names land with their own episodes.
+# wombat, capybara and meerkat are stand-ins — they will be replaced.
+# (The route shapes below are real: one path-split route, two plain ones.)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: wombat
+  namespace: service-one
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: web
+  hostnames:
+    - wombat.nc
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: service-one-backend
+          port: 8042
+    - backendRefs:
+        - name: service-one-frontend
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: capybara
+  namespace: service-two
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: web
+  hostnames:
+    - capybara.nc
+  rules:
+    - backendRefs:
+        - name: service-two
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: meerkat
+  namespace: service-three
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: web
+  hostnames:
+    - meerkat.nc
+  rules:
+    - backendRefs:
+        - name: service-three
+          port: 443

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: traefik
+description: Traefik v3 Gateway API controller (ADR-005)
+type: application
+version: 0.1.0

@@ -48,6 +48,18 @@ The cluster is a render of this repo — pushed commits are deployments.
 - reproducible by default: delete the Applications and git recreates
   them from the same commit
 
+## The networking (episode 5, [ADR-005](docs/decisions/ADR-005-ingress-gateway-api.md))
+
+Every service gets a `*.nc` name — the LAN gateway's DNS hosts the zone,
+external-dns writes the records. Traffic is routed by the Gateway API:
+
+- the **Gateway** (capital G) is the Kubernetes resource that routes
+  traffic: `Gateway → HTTPRoute → Service`
+- the **gateway** (lowercase) is the dusty MikroTik at 192.168.1.1 that
+  resolves the names — same word, two different jobs
+- [Traefik v3](modules/apps/traefik/) runs it: ~100–200 MiB, against the
+  ~1.5 GiB an Envoy Gateway would ask for on 12 GB
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |
@@ -56,7 +68,8 @@ The cluster is a render of this repo — pushed commits are deployments.
 | 2 | The scope — repo public | ✅ shipped |
 | 3 | The 4 GB wall | ✅ shipped |
 | 4 | The GitOps foundation | ✅ shipped |
-| 5+ | The build continues | coming — each episode adds its own artifacts |
+| 5 | The networking | ✅ shipped |
+| 6+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)

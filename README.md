@@ -55,8 +55,9 @@ external-dns writes the records. Traffic is routed by the Gateway API:
 
 - the **Gateway** (capital G) is the Kubernetes resource that routes
   traffic: `Gateway → HTTPRoute → Service`
-- the **gateway** (lowercase) is the dusty MikroTik at 192.168.1.1 that
-  resolves the names — same word, two different jobs
+- the **gateway** (lowercase) is the MikroTik that resolves the names —
+  a newer box at 192.168.1.1, while the older one (10.42.42.1) is where
+  the cluster's nodes plug in — same word, two different jobs
 - [Traefik v3](modules/apps/traefik/) runs it: ~100–200 MiB, against the
   ~1.5 GiB an Envoy Gateway would ask for on 12 GB
 

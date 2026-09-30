@@ -12,7 +12,8 @@ workloads, all inside that constraint.
 - 3× [NanoPC-T4](https://wiki.friendlyelec.com/wiki/index.php/NanoPC-T4) (Rockchip RK3399, 4 GB LPDDR3, ARMv8.0)
 - 1 dusty MikroTik routing the cluster (10.42.42.1) + a newer one
   hosting the LAN DNS for the `*.nc` zone (192.168.1.1)
-- 1 NAS (amd64) next to it — registry mirror + the fast CI runner
+- 1 desktop (amd64 — the TARDIS, 48 GB) next to it — registry mirror
+  + the fast CI runner
 
 ## The scope (episode 2, [ADR-001](docs/decisions/ADR-001-scope.md))
 
@@ -70,10 +71,14 @@ external-dns writes the records. Traffic is routed by the Gateway API:
 | 3 | The 4 GB wall | ✅ shipped |
 | 4 | The GitOps foundation | ✅ shipped |
 | 5 | The networking | ✅ shipped |
-| 6+ | The build continues | coming — each episode adds its own artifacts |
+| 6 | CI/CD — the dual runner | ✅ shipped |
+| 7+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)
+
+A GitLab migration is on my mind — free self-hosted CI in the same
+resource style — but that's the future's music, not this season's.
 
 ## Layout (final, as it will grow)
 

@@ -1,0 +1,36 @@
+name: hello-runners
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  amd64:
+    name: AMD64 native build
+    runs-on: tardis
+    steps:
+      - name: Checkout
+        run: |
+          git clone --depth 1 --branch "${{ github.ref_name }}" \
+            http://oauth2:${{ github.token }}@<gitea-host>/${{ github.repository }}.git .
+      - name: Build and push (amd64)
+        run: |
+          TAG=${{ vars.REGISTRY }}/ci-demo:${GITHUB_SHA:0:8}-amd64
+          docker build -t "$TAG" ci-demo/
+          docker push "$TAG"
+          echo "Pushed: $TAG"
+
+  arm64:
+    name: ARM64 native build
+    runs-on: nanocluster
+    steps:
+      - name: Checkout
+        run: |
+          git clone --depth 1 --branch "${{ github.ref_name }}" \
+            http://oauth2:${{ github.token }}@<gitea-host>/${{ github.repository }}.git .
+      - name: Build and push (arm64)
+        run: |
+          TAG=${{ vars.REGISTRY }}/ci-demo:${GITHUB_SHA:0:8}-arm64
+          docker build -t "$TAG" ci-demo/
+          docker push "$TAG"
+          echo "Pushed: $TAG"

@@ -62,16 +62,26 @@ external-dns writes the records. Traffic is routed by the Gateway API:
 - [Traefik v3](modules/apps/traefik/) runs it: ~100–200 MiB, against the
   ~1.5 GiB an Envoy Gateway would ask for on 12 GB
 
+## The CI/CD (episode 6, [ADR-003](docs/decisions/ADR-003-dual-runners.md))
+
+Two self-hosted Gitea Actions runners, one per architecture:
+- the desktop runner (`tardis`, amd64, 48 GB) — native host docker, seconds
+- the cluster runner (`nanocluster`, arm64) — dind inside the cluster,
+  the real test
+- jobs are named after the architecture, `runs-on` after the machine —
+  [`.gitea/workflows/hello-runners.yml`](.gitea/workflows/hello-runners.yml)
+  pushes both architectures into the local registry
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |
 |---|---------|--------|
-| 1 | The hardware | ✅ shipped |
-| 2 | The scope — repo public | ✅ shipped |
-| 3 | The 4 GB wall | ✅ shipped |
-| 4 | The GitOps foundation | ✅ shipped |
-| 5 | The networking | ✅ shipped |
-| 6 | CI/CD — the dual runner | ✅ shipped |
+| 1 | The hardware | ✅ shipped — [post](https://lnkd.in/p/dqB6vqXj) |
+| 2 | The scope — repo public | ✅ shipped — [post](https://lnkd.in/p/dnumBJQr) |
+| 3 | The 4 GB wall | ✅ shipped — [post](https://lnkd.in/p/d9RWdgbB) |
+| 4 | The GitOps foundation | ✅ shipped — [post](https://lnkd.in/p/dhyt3pqF) |
+| 5 | The networking | ✅ shipped — [post](https://lnkd.in/p/dy9Y6SbH) |
+| 6 | CI/CD — the dual runner | ✅ shipped — [post](https://lnkd.in/p/dWuqgZbX) |
 | 7+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode

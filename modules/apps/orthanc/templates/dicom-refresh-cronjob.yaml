@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: orthanc-dicom-refresh
+  namespace: orthanc
+spec:
+  schedule: "0 3 * * 6"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: refresh
+              image: 192.168.1.222:5000/dicom-py-arm64:1.1
+              command: ["python3", "/refresh.py"]
+              env:
+                - name: ORTHANC_URL
+                  value: "http://orthanc:8042"
+                - name: MAX_SERIES
+                  value: "5"
+              volumeMounts:
+                - name: script
+                  mountPath: /refresh.py
+                  subPath: script.py
+          volumes:
+            - name: script
+              configMap:
+                name: orthanc-dicom-refresh

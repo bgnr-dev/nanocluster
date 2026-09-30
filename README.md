@@ -72,6 +72,18 @@ Two self-hosted Gitea Actions runners, one per architecture:
   [`.gitea/workflows/hello-runners.yml`](.gitea/workflows/hello-runners.yml)
   pushes both architectures into the local registry
 
+## The medical imaging (episode 7)
+
+A real medical-imaging workload on a 4 GB board — DICOM server, browser
+viewer, and demo data that renews itself:
+
+- [`orthanc/`](modules/apps/orthanc/) — Orthanc DICOM server + [OHIF](https://ohif.org/) viewer
+- a weekly [CronJob](modules/apps/orthanc/templates/dicom-refresh-cronjob.yaml)
+  pulls a fresh [TCIA](https://www.cancerimagingarchive.net/) series and prunes
+  the oldest — the demo never goes stale, no operator needed
+- the whole server + viewer fits under the 1 GiB budget
+  ([ADR-002](docs/decisions/ADR-002-resource-budget.md))
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |
@@ -82,7 +94,8 @@ Two self-hosted Gitea Actions runners, one per architecture:
 | 4 | The GitOps foundation | ✅ shipped — [post](https://lnkd.in/p/dhyt3pqF) |
 | 5 | The networking | ✅ shipped — [post](https://lnkd.in/p/dy9Y6SbH) |
 | 6 | CI/CD — the dual runner | ✅ shipped — [post](https://lnkd.in/p/dWuqgZbX) |
-| 7+ | The build continues | coming — each episode adds its own artifacts |
+| 7 | Medical imaging — Orthanc + OHIF | ✅ shipped — [post](https://www.linkedin.com/feed/update/urn:li:activity:7511116427534327809/) |
+| 8+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: orthanc
+description: Orthanc DICOM server + OHIF viewer (medical imaging workload)
+type: application
+version: 0.1.0
+appVersion: "latest-full"

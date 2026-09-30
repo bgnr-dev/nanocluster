@@ -1,0 +1,126 @@
+# Orthanc configuration — DICOM server + DICOMweb for OHIF.
+# Medical detail is the content: auth disabled on purpose (LAN-only boundary,
+# see docs/decisions/ADR-004-orthanc). Plugins are in plugins-available inside
+# the image; we activate the DICOMweb + OHIF web viewer ones.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orthanc-config
+  namespace: orthanc
+data:
+  orthanc.json: |
+    {
+      "StorageDirectory": "/var/lib/orthanc/db",
+      "RemoteAccessAllowed": true,
+      "AuthenticationEnabled": false,
+      "TcpNoDelay": true,
+      "Plugins": [
+        "/usr/share/orthanc/plugins-available/libOrthancDicomWeb.so",
+        "/usr/share/orthanc/plugins-available/libOrthancOHIF.so",
+        "/usr/share/orthanc/plugins-available/libOrthancWebViewer.so"
+      ],
+      "DicomWeb": {
+        "Enable": true,
+        "Root": "/dicom-web/",
+        "EnableWado": true,
+        "EnableWadoRs": true
+      },
+      "OrthancOHIF": {
+        "Enable": true
+      },
+      "OrthancWebViewer": {
+        "Enable": true
+      },
+      "HttpServer": {
+        "EnableCORS": true
+      }
+    }
+  app-config.js: |
+    /** OHIF config — follows the working netlify.js pattern exactly, with our
+        Orthanc as the single DICOMweb data source. */
+    window.config = {
+      routerBasename: null,
+      customizationService: ['@ohif/extension-default.customizationModule.theme'],
+      extensions: [],
+      modes: [],
+      showStudyList: true,
+      studyListFunctionsEnabled: true,
+      dataSources: [
+        {
+          namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+          sourceName: 'orthanc',
+          configuration: {
+            friendlyName: 'Orthanc Nanocluster',
+            name: 'orthanc',
+            wadoUriRoot: '/dicom-web',
+            qidoRoot: '/dicom-web',
+            wadoRoot: '/dicom-web',
+            qidoSupportsIncludeField: false,
+            imageRendering: 'wadors',
+            thumbnailRendering: 'wadors',
+            enableStudyLazyLoad: true,
+            supportsFuzzyMatching: false,
+            supportsWildcard: true,
+            staticWado: false,
+          },
+        },
+      ],
+      // defaultDataSourceName selects which server the Study List queries.
+      defaultDataSourceName: 'orthanc',
+      // NOTE: no 'oidc' key — empty [] is truthy and renders OIDC routes,
+      // which crash on oidc[0].authority in this build.
+    }
+  nginx-default.conf: |
+    server {
+      listen 80;
+      server_name _;
+      root /usr/share/nginx/html;
+      index index.html;
+
+      # The OHIF build ships 0-byte .js stubs + real .js.gz files —
+      # serve the precompressed ones (this is how the image is meant to run).
+      gzip_static on;
+      gzip_proxied any;
+
+      # Never cache the app config: config changes must reach the browser.
+      # gzip_static OFF here: the image ships an old app-config.js.gz (stale
+      # config) which would otherwise be served instead of our mounted file.
+      location = /app-config.js {
+        gzip_static off;
+        gzip off;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+        expires -1;
+        try_files $uri =404;
+      }
+
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orthanc
+  namespace: orthanc
+spec:
+  selector:
+    app: orthanc
+  ports:
+    - name: http
+      port: 8042
+      targetPort: 8042
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ohif
+  namespace: orthanc
+spec:
+  selector:
+    app: ohif
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

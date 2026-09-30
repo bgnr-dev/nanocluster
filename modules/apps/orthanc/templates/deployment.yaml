@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orthanc
+  namespace: orthanc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orthanc
+  template:
+    metadata:
+      labels:
+        app: orthanc
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: orthanc
+          image: 192.168.1.222:5000/orthanc-arm64:latest-full
+          args: ["/run/secrets/orthanc.json"]
+          ports:
+            - containerPort: 8042
+              name: http
+            - containerPort: 4242
+              name: dicom
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits:   {memory: 1Gi}
+          volumeMounts:
+            - name: config
+              mountPath: /run/secrets/orthanc.json
+              subPath: orthanc.json
+            - name: db
+              mountPath: /var/lib/orthanc/db
+              subPath: db
+      volumes:
+        - name: config
+          configMap:
+            name: orthanc-config
+            items:
+              - key: orthanc.json
+                path: orthanc.json
+        - name: db
+          persistentVolumeClaim:
+            claimName: orthanc-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ohif
+  namespace: orthanc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ohif
+  template:
+    metadata:
+      labels:
+        app: ohif
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: ohif
+          image: 192.168.1.222:5000/ohif-arm64:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits:   {memory: 512Mi}
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/nginx/html/app-config.js
+              subPath: app-config.js
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: config
+          configMap:
+            name: orthanc-config
+            items:
+              - key: app-config.js
+                path: app-config.js
+        - name: nginx-conf
+          configMap:
+            name: orthanc-config
+            items:
+              - key: nginx-default.conf
+                path: default.conf

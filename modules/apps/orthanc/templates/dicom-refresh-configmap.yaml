@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orthanc-dicom-refresh
+  namespace: orthanc
+data:
+  script.py: |
+    #!/usr/bin/env python3
+    """Weekly Orthanc refresh: fetch a fresh TCIA CT series, STOW it, prune old series."""
+    import json, random, sys, os, io, zipfile, http.client, urllib.request, urllib.parse
+
+    TCIA = "https://services.cancerimagingarchive.net/nbia-api/services/v1"
+    ORTHANC = os.environ.get("ORTHANC_URL", "http://orthanc:8042")
+    MAX_SERIES = int(os.environ.get("MAX_SERIES", "5"))
+
+    def get_json(url, timeout=60):
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return json.load(r)
+
+    def fetch_series(out_dir):
+        cols = get_json(f"{TCIA}/getCollectionValues")
+        random.shuffle(cols)
+        for coll in cols[:8]:
+            name = coll["Collection"]
+            try:
+                series = get_json(f"{TCIA}/getSeries?Collection={urllib.parse.quote(name)}&Modality=CT")
+            except Exception:
+                continue
+            ok = [s for s in series if 5 <= s.get("ImageCount", 0) <= 300 and s.get("FileSize", 0) < 80 * 1024 * 1024]
+            pool = ok or [s for s in series if s.get("ImageCount", 0) > 0]
+            if not pool:
+                continue
+            s = random.choice(pool)
+            uid = s["SeriesInstanceUID"]
+            try:
+                with urllib.request.urlopen(f"{TCIA}/getImage?SeriesInstanceUID={urllib.parse.quote(uid)}", timeout=900) as r:
+                    data = r.read()
+            except Exception:
+                continue
+            dcm_files = []
+            try:
+                zf = zipfile.ZipFile(io.BytesIO(data))
+                for n in zf.namelist():
+                    if n.lower().endswith((".dcm", ".dicom")):
+                        fn = os.path.join(out_dir, os.path.basename(n))
+                        with zf.open(n) as src, open(fn, "wb") as dst:
+                            dst.write(src.read())
+                        dcm_files.append(fn)
+            except zipfile.BadZipFile:
+                continue
+            if dcm_files:
+                print(f"[TCIA] OK - {len(dcm_files)} DICOM files (series {uid[:12]})")
+                return dcm_files
+        raise RuntimeError("TCIA fetch failed after attempts")
+
+    def stow(files):
+        boundary = "dicom-upload-boundary"
+        u = urllib.parse.urlsplit(ORTHANC)
+        parts = []
+        for f in files:
+            with open(f, "rb") as fh:
+                data = fh.read()
+            parts.append(
+                f"--{boundary}\r\nContent-Type: application/dicom\r\nContent-Length: {len(data)}\r\n\r\n".encode()
+                + data + b"\r\n"
+            )
+        body = b"".join(parts) + f"--{boundary}--\r\n".encode()
+        conn = http.client.HTTPConnection(u.hostname, u.port or 80, timeout=600)
+        conn.request("POST", "/dicom-web/studies", body, {
+            "Content-Type": f'multipart/related; type="application/dicom"; boundary={boundary}',
+            "Accept": "application/json",
+        })
+        resp = conn.getresponse()
+        print(f"[STOW] HTTP {resp.status}")
+        if resp.status not in (200, 201, 204):
+            print(resp.read().decode(errors="replace")[:400])
+            return False
+        return True
+
+    def prune(max_series):
+        with urllib.request.urlopen(f"{ORTHANC}/series", timeout=60) as r:
+            series = json.load(r)
+        print(f"[PRUNE] {len(series)} series, cap {max_series}")
+        while len(series) > max_series:
+            oldest = series.pop(0)  # Orthanc lists oldest first
+            req = urllib.request.Request(f"{ORTHANC}/series/{oldest}", method="DELETE")
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    print(f"[PRUNE] deleted {oldest} (HTTP {r.status})")
+            except Exception as e:
+                print(f"[PRUNE] delete {oldest} failed: {e}")
+
+    def main():
+        out_dir = "/tmp/orthanc-refresh"
+        os.makedirs(out_dir, exist_ok=True)
+        files = fetch_series(out_dir)
+        ok = stow(files)
+        prune(MAX_SERIES)
+        for f in os.listdir(out_dir):
+            os.remove(os.path.join(out_dir, f))
+        sys.exit(0 if ok else 1)
+
+    if __name__ == "__main__":
+        main()

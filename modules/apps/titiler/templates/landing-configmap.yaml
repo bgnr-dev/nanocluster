@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: titiler-landing
+  namespace: titiler
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>NanoCluster — Sentinel-2 Earth Observation (TiTiler)</title>
+      <style>
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background: #0b0f14; color: #e6edf3; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+          min-height: 100vh; display: flex; flex-direction: column;
+        }
+        header {
+          padding: 14px 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+          border-bottom: 1px solid #1e2733;
+        }
+        header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.02em; }
+        header h1 span { color: #4ade80; }
+        header p { color: #8b98a9; font-size: 12.5px; }
+        header .spacer { flex: 1; }
+        header a {
+          color: #9db4cc; text-decoration: none; font-size: 12.5px; padding: 5px 10px;
+          border: 1px solid #243140; border-radius: 6px;
+        }
+        header a:hover { color: #fff; border-color: #3b82f6; }
+        main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; gap: 14px; }
+        figure { max-width: 100%; text-align: center; }
+        figure img {
+          max-width: min(100%, 1200px); height: auto; border-radius: 10px;
+          border: 1px solid #243140; box-shadow: 0 8px 30px rgba(0,0,0,.5);
+        }
+        figcaption { margin-top: 10px; color: #8b98a9; font-size: 12.5px; }
+        footer {
+          padding: 8px 22px; border-top: 1px solid #1e2733; color: #66707d;
+          font-size: 11.5px; display: flex; gap: 18px; flex-wrap: wrap;
+        }
+        footer code { color: #8b98a9; }
+      </style>
+    </head>
+    <body>
+      <header>
+        <h1>🛰️ NanoCluster <span>·</span> Sentinel-2 Earth Observation</h1>
+        <p>TiTiler on 3× ARM64 nodes (12 GB) — streaming a Cloud-Optimized GeoTIFF from AWS Open Data</p>
+        <span class="spacer"></span>
+        <a href="/cog/viewer?url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B04.tif&amp;url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B03.tif&amp;url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B02.tif&amp;bidx=1&amp;bidx=1&amp;bidx=1&amp;rescale=0,3000" target="_blank">Open interactive viewer ↗</a>
+        <a href="/api" target="_blank">API docs</a>
+      </header>
+      <main>
+        <figure>
+          <img
+            alt="Sentinel-2 RGB composite of the Oregon coast (10TET tile, 2020-07)"
+            src="/cog/preview?url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B04.tif&amp;url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B03.tif&amp;url=https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/10/T/ET/2017/1/S2A_10TET_20170103_0_L2A/B02.tif&amp;bidx=1&amp;bidx=1&amp;bidx=1&amp;rescale=0,3000&amp;max_size=1024">
+          <figcaption>Sentinel-2 L2A, tile 10TET, 2017-01 — B04/B03/B02 → RGB, rescale 0–3000 (false-color true RGB composite). Streamed from AWS Open Data; no data stored on the cluster.</figcaption>
+        </figure>
+      </main>
+      <footer>
+        <span>Data: <a href="https://registry.opendata.aws/sentinel-2/" style="color:#5b8db8;text-decoration:none">AWS Open Data — Sentinel-2 L2A</a></span>
+        <span>Tile server: <code>TiTiler</code> (DevelopmentSeed)</span>
+        <span>Band combination: <code>B04,B03,B02 → RGB</code> · <code>rescale=0,3000</code></span>
+        <span>COGs streamed via HTTP range — no storage on cluster</span>
+      </footer>
+    </body>
+    </html>

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titiler
+  namespace: titiler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: titiler
+  template:
+    metadata:
+      labels:
+        app: titiler
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: titiler
+          image: 192.168.1.222:5000/titiler-arm64:latest
+          ports:
+            - containerPort: 8000
+          env:
+            # Stream COGs from AWS Open Data / any public bucket over HTTP.
+            # 200MB cache: 12GB-cluster-friendly, not a memory sink.
+            - name: WEB_CONCURRENCY
+              value: "1"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8000"
+            - name: TITILER_CACHE_MAXSIZE
+              value: "256"
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits:   {memory: 1Gi}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+        - name: landing
+          image: 192.168.1.222:5000/nginx-alpine-arm64:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: landing
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits:   {memory: 64Mi}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: landing
+          configMap:
+            name: titiler-landing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: titiler
+  namespace: titiler
+spec:
+  selector:
+    app: titiler
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+    - name: landing
+      port: 8080
+      targetPort: 80

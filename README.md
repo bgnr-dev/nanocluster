@@ -84,6 +84,18 @@ viewer, and demo data that renews itself:
 - the whole server + viewer fits under the 1 GiB budget
   ([ADR-002](docs/decisions/ADR-002-resource-budget.md))
 
+## The earth observation (episode 8)
+
+A satellite image on a 4 GB board — the pipeline streams, nothing is stored:
+
+- [`titiler/`](modules/apps/titiler/) — [TiTiler](https://developmentseed.org/titiler/) COG tile server
+- a real Sentinel-2 L2A scene from [AWS Open Data](https://registry.opendata.aws/sentinel-2/)
+  (10980×10980 px, bands B04/B03/B02 → RGB)
+- **0 bytes of storage** on the cluster: the COG streams over HTTP range
+  requests, and the tile server fetches only the pixels the viewport asks for
+- the RGB composite renders through the preview endpoint — the landing page
+  at `titiler.nc` embeds it
+
 ## The roadmap (repo artifacts appear with each episode)
 
 | # | Episode | Status |
@@ -95,7 +107,8 @@ viewer, and demo data that renews itself:
 | 5 | The networking | ✅ shipped — [post](https://lnkd.in/p/dy9Y6SbH) |
 | 6 | CI/CD — the dual runner | ✅ shipped — [post](https://lnkd.in/p/dWuqgZbX) |
 | 7 | Medical imaging — Orthanc + OHIF | ✅ shipped — [post](https://www.linkedin.com/feed/update/urn:li:activity:7511116427534327809/) |
-| 8+ | The build continues | coming — each episode adds its own artifacts |
+| 8 | Earth observation — TiTiler + Sentinel-2 | ✅ shipped — [post](https://www.linkedin.com/feed/update/urn:li:activity:7512836167885783042/) |
+| 9+ | The build continues | coming — each episode adds its own artifacts |
 
 (Every link and artifact appears here at the same time the episode
 publishes — nothing spoils the story ahead of its post.)

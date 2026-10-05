@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: titiler
+  namespace: titiler
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: titiler.nc
+      http:
+                paths:
+                  - path: /cog
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /docs
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /api
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /redoc
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /healthz
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /tileMatrixSets
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /algorithms
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /colorMaps
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /conformance
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: http}}}
+                  - path: /
+                    pathType: Prefix
+                    backend: {service: {name: titiler, port: {name: landing}}}

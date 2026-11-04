@@ -7,6 +7,8 @@ workloads, all inside that constraint.
 > This repo grows with a public building-log series: each episode ships
 > the artifacts it talks about. What you see now is the foundation.
 
+![NanoCluster — three NanoPC-T4 boards, 12 GB of RAM total](nanocluster.png)
+
 ## The hardware (episode 1)
 
 - 3× [NanoPC-T4](https://wiki.friendlyelec.com/wiki/index.php/NanoPC-T4) (Rockchip RK3399, 4 GB LPDDR3, ARMv8.0)
